@@ -1,6 +1,7 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var { ObjectId } = require('mongodb');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const { ObjectId } = require('mongodb');
 
 var { mongoose } = require('./db/mongoose.js');
 var { Todo } = require('./models/todo.js');
@@ -60,6 +61,32 @@ app.delete('/todos/:id', (request, response) => {
         }
         response.send({ todo });
     }, (e) => response.status(400).send());
+});
+
+app.patch('/todos/:id', (request, response) => {
+    var id = request.params.id;
+    var body = _.pick(request.body, ['text', 'completed']);
+
+    if (!ObjectId.isValid(id)) {
+        return response.status(404).send();
+    }
+
+    if (_.isBoolean(body.completed) && body.completed) {
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+
+    Todo.findByIdAndUpdate(id, { $set: body }, { new: true }).then((todo) => {
+        if (!todo) {
+            return response.status(404).send();
+        }
+        return response.send(todo);
+    }).catch((error) => {
+        response.status(400).send();
+    });
+
 });
 
 app.listen(port, () => {
