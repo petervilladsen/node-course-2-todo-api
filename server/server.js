@@ -84,11 +84,22 @@ app.patch('/todos/:id', (request, response) => {
         if (!todo) {
             return response.status(404).send();
         }
-        return response.send(todo);
+        return response.send({ todo });
     }).catch((error) => {
         response.status(400).send();
     });
 
+});
+
+app.post('/users', (request, response) => {
+    var body = _.pick(request.body, ['email', 'password']);
+    var user = new User(body);
+
+    user.save().then((user) => {
+        response.send({ user });
+    }, (error) => {
+        response.status(400).send(error);
+    })
 });
 
 app.listen(port, () => {

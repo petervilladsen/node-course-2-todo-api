@@ -145,7 +145,7 @@ describe('PATCH /todos/:id', () => {
             .send({ text: newTxt, completed: true })
             .expect(200)
             .expect((result) => {
-                var todo = result.body;
+                var todo = result.body.todo;
                 expect(todo.text).toBe(newTxt);
                 expect(todo.completed).toBe(true);
                 expect(todo.completedAt).toBeA('number');
@@ -160,7 +160,7 @@ describe('PATCH /todos/:id', () => {
             .send({ text: newTxt, completed: false })
             .expect(200)
             .expect((result) => {
-                var todo = result.body;
+                var todo = result.body.todo;
                 expect(todo.text).toBe(newTxt);
                 expect(todo.completed).toBe(false);
                 expect(todo.completedAt).toNotExist();
