@@ -92,7 +92,7 @@ app.patch('/todos/:id', (request, response) => {
 
 });
 
-// POST /users
+
 app.post('/users', (req, res) => {
     var body = _.pick(req.body, ['email', 'password']);
     var user = new User(body);
@@ -105,13 +105,25 @@ app.post('/users', (req, res) => {
         res.status(400).send(e);
     })
 });
-app.listen(port, () => {
-    console.log(`Started on port ${port}`);
-});
-
 
 app.get('/users/me', authenticate, (request, response) => {
     response.send(request.user);
+});
+
+// POST /users/login {email, password}
+app.post('/users/login', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password']);
+
+    User.findByCredentials(body.email, body.password).then((user) => {
+        return user.generateAuthToken().then((token) => {
+            res.header('x-auth', token).send(user);
+        });
+    }).catch((e) => {
+        res.status(400).send();
+    });
+});
+app.listen(port, () => {
+    console.log(`Started on port ${port}`);
 });
 
 module.exports = { app };
